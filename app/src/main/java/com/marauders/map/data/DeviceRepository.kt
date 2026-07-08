@@ -78,7 +78,7 @@ class DeviceRepository(
     }
 
     /** 节流落库：首次出现立即写档案；之后每 [SIGHTING_MIN_INTERVAL_MS] 记录一次 Sighting 并同步档案 */
-    private fun persist(list: List<UiDevice>, now: Long) {
+    private suspend fun persist(list: List<UiDevice>, now: Long) {
         for (d in list) {
             val info = profileCache[d.mac] ?: continue
             val last = lastSightingAt[d.mac] ?: 0

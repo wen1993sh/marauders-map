@@ -2,8 +2,8 @@ package com.marauders.map.ui
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.SharingStarted
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
 import com.marauders.map.data.DeviceRepository
 import com.marauders.map.data.local.SightingEntity
 import com.marauders.map.model.ScannedDevice
