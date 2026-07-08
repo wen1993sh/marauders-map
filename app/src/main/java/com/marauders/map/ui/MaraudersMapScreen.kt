@@ -39,7 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Stroke
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.font.FontFamily
@@ -77,13 +77,13 @@ fun MaraudersMapScreen(
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                 Text(
                     "活点地图",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.h4,
                     fontFamily = FontFamily.Cursive,
                     color = Ink
                 )
                 Text(
                     "“我庄严宣誓，我干的都不是好事。”",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.body2,
                     color = Ink.copy(alpha = 0.6f),
                     fontFamily = FontFamily.Cursive
                 )

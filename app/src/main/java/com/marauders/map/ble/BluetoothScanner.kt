@@ -10,6 +10,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import com.marauders.map.model.ScannedDevice
+import kotlin.math.absoluteValue
+import kotlin.math.pow
 
 /**
  * 蓝牙低功耗（BLE）扫描器。
@@ -65,7 +67,7 @@ class BluetoothScanner(
         val le = leScanner ?: return
         if (!hasPermission()) return
         if (!scanning) {
-            le.startScan(scanSettings, callback)
+            le.startScan(null, scanSettings, callback)
             scanning = true
         }
     }
