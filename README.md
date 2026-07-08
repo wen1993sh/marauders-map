@@ -7,6 +7,15 @@
 - Kotlin + Jetpack Compose（原生 Android）
 - `BluetoothLeScanner` 做 BLE 扫描
 - RSSI 估算距离，旋转扫描扇形可视化
+- Room 本地持久化（设备档案 + 出现时间线），MVVM 架构
+- KSP 处理 Room 注解
+
+## 功能特性（v2）
+- 抽象雷达：自己在圆心，距离=RSSI 估算，方向=示意（MAC 哈希）
+- 仅 BLE；有广播名用真名，无名的给**稳定魔法绰号**且画得更淡当背景
+- 最近 8 个设备高亮带标签，其余更小更淡（聚焦 N，常量可调）
+- 点光点 / 列表项弹出**详情卡**：名字、MAC、信号、距离、首次见、出现次数、近期时间线
+- 数据仅存本机（Room），不联网
 
 ## 目录结构
 ```
@@ -14,10 +23,12 @@ MaraudersMap/
 ├── app/build.gradle.kts
 ├── app/src/main/AndroidManifest.xml
 ├── app/src/main/java/com/marauders/map/
-│   ├── MainActivity.kt                 # 入口：权限 / 蓝牙开关 / 绑定 UI
+│   ├── MainActivity.kt                 # 入口：权限 / 蓝牙开关 / 装配 ViewModel
 │   ├── ble/BluetoothScanner.kt         # BLE 扫描核心逻辑
-│   ├── model/ScannedDevice.kt          # 设备数据模型
-│   └── ui/                             # 主题 + 雷达/列表 UI
+│   ├── data/                           # RadarMath(常量/纯函数) · NameProvider · DeviceRepository
+│   │   └── local/                      # Room：AppDatabase · Entity · Dao
+│   ├── model/                          # ScannedDevice(扫描传输) · UiDevice(界面模型)
+│   └── ui/                             # 主题 · 雷达/列表 UI · 详情卡 · MapViewModel
 ├── build.gradle.kts
 └── settings.gradle.kts
 ```
@@ -60,5 +71,7 @@ MaraudersMap/
 - **方位角是示意值**：当前用 MAC 地址哈希固定方向，并非真实测向。
   若要做到"谁在哪个方向"，需要多天线/AoA、IMU 或 RSSI 三角定位，属于后续增强。
 - **距离是估算值**：基于 RSSI 的自由空间模型，受遮挡、人体、设备发射功率影响很大，
-  可用 `BluetoothScanner.MEASURED_POWER / PATH_LOSS` 现场校准。
-- 可扩展：接入真实地图底图、按设备类型分类着色、记录设备轨迹、导出 CSV 等。
+  可用 `data/RadarMath.kt` 里的 `MEASURED_POWER` / `PATH_LOSS` 现场校准。
+- 关键常量都在 `data/RadarMath.kt`：`FOCUS_COUNT`(8)、`MAX_RANGE_M`(15)、
+  `SIGHTING_MIN_INTERVAL_MS`(120000) 等，改一处即可调。
+- 可扩展（本版未做）：真实地图底图、按设备类型分类着色、导出 CSV、独立设置页等。

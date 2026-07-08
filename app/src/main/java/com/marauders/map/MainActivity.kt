@@ -10,9 +10,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.DisposableEffect
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.marauders.map.ble.BluetoothScanner
 import com.marauders.map.ui.MaraudersMapScreen
+import com.marauders.map.ui.MaraudersTheme
+import com.marauders.map.ui.MapViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -41,12 +45,20 @@ class MainActivity : ComponentActivity() {
         scanner = BluetoothScanner(this, bluetoothAdapter)
 
         setContent {
-            MaraudersMapScreen(
-                hasBluetooth = bluetoothAdapter != null,
-                scanner = scanner,
-                onStartScan = { ensureReadyAndScan() },
-                onStopScan = { scanner.stop() }
-            )
+            val viewModel: MapViewModel = viewModel()
+            DisposableEffect(viewModel) {
+                scanner.onUpdate = viewModel::ingest
+                onDispose { scanner.onUpdate = null }
+            }
+            MaraudersTheme {
+                MaraudersMapScreen(
+                    viewModel = viewModel,
+                    hasBluetooth = bluetoothAdapter != null,
+                    scanner = scanner,
+                    onStartScan = { ensureReadyAndScan() },
+                    onStopScan = { scanner.stop() }
+                )
+            }
         }
     }
 

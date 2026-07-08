@@ -9,15 +9,16 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
+import com.marauders.map.data.UNKNOWN_NAME
+import com.marauders.map.data.angleFromAddress
+import com.marauders.map.data.rssiToDistance
 import com.marauders.map.model.ScannedDevice
-import kotlin.math.absoluteValue
-import kotlin.math.pow
 
 /**
  * 蓝牙低功耗（BLE）扫描器。
  *
- * 扫描结果通过 [onUpdate] 回调以“去重后的设备列表”形式抛出，
- * 上层（Compose）把它存进 state 即可驱动雷达刷新。
+ * 扫描结果通过 [onUpdate] 回调以“去重后的设备列表”形式抛出。
+ * 上层（ViewModel）把它交给 Repository 做合并与持久化。
  */
 class BluetoothScanner(
     private val context: Context,
@@ -42,7 +43,7 @@ class BluetoothScanner(
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device
             val address = device.address ?: return
-            val name = device.name ?: "未知设备"
+            val name = device.name ?: UNKNOWN_NAME
             val rssi = result.rssi
             val existing = devices[address]
             devices[address] = ScannedDevice(
@@ -87,26 +88,6 @@ class BluetoothScanner(
             ContextCompat.checkSelfPermission(
                 context, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
-        }
-    }
-
-    companion object {
-        /** 1 米处的参考 RSSI（实测值，可按设备校准） */
-        private const val MEASURED_POWER = -59
-        /** 环境衰减系数（2.0 空旷 ~ 3.5 复杂室内） */
-        private const val PATH_LOSS = 2.2
-
-        /** 由 RSSI 估算距离（米）：d = 10^((MeasuredPower - RSSI) / (10 * n)) */
-        fun rssiToDistance(rssi: Int): Double {
-            val ratio = (MEASURED_POWER - rssi) / (10.0 * PATH_LOSS)
-            return 10.0.pow(ratio)
-        }
-
-        /** 由 MAC 地址生成稳定的 0~360 方位角 */
-        fun angleFromAddress(address: String): Float {
-            var h = 7
-            address.forEach { h = (h * 31 + it.code).absoluteValue }
-            return (h % 360).toFloat()
         }
     }
 }
